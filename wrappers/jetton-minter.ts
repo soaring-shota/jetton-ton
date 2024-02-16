@@ -1,9 +1,8 @@
-import BN from "bn.js";
-import { Cell, beginCell, Address } from "ton";
+import { Cell, beginCell, Address } from "@ton/ton";
 import { beginMessage } from "./helpers";
 
 export function data(params: {
-    totalSupply: BN;
+    totalSupply: bigint;
     adminAddress: Address;
     jettonWalletCode: Cell;
 }): Cell {
@@ -15,8 +14,8 @@ export function data(params: {
         .endCell();
 }
 
-export function mint(params: { toAddress: Address; gasAmount: BN, jettonAmount: BN; fromAddress?: Address; responseAddress?: Address; forwardTonAmount?: BN; }): Cell {
-    return beginMessage({ op: new BN(21) })
+export function mint(params: { toAddress: Address; gasAmount: bigint, jettonAmount: bigint; fromAddress?: Address; responseAddress?: Address; forwardTonAmount?: bigint; }): Cell {
+    return beginMessage({ op: BigInt(21) })
         .storeAddress(params.toAddress)
         .storeCoins(params.gasAmount)
         .storeRef(beginCell()
@@ -25,14 +24,14 @@ export function mint(params: { toAddress: Address; gasAmount: BN, jettonAmount: 
             .storeCoins(params.jettonAmount)
             .storeAddress(params.fromAddress || null)
             .storeAddress(params.responseAddress || null)
-            .storeCoins(params.forwardTonAmount || new BN(0))
+            .storeCoins(params.forwardTonAmount || BigInt(0))
             .storeUint(0, 1)
             .endCell())
         .endCell();
 }
 
-export function burnNotification(params: { jettonAmount: BN; fromAddress: Address; responseAddress?: Address }): Cell {
-    return beginMessage({ op: new BN(0x7bdd97de) })
+export function burnNotification(params: { jettonAmount: bigint; fromAddress: Address; responseAddress?: Address }): Cell {
+    return beginMessage({ op: BigInt(0x7bdd97de) })
         .storeCoins(params.jettonAmount)
         .storeAddress(params.fromAddress)
         .storeAddress(params.responseAddress || null)
@@ -40,17 +39,17 @@ export function burnNotification(params: { jettonAmount: BN; fromAddress: Addres
 }
 
 export function changeAdmin(params: { newAdmin: Address }): Cell {
-    return beginMessage({ op: new BN(3) })
+    return beginMessage({ op: BigInt(3) })
         .storeAddress(params.newAdmin)
         .endCell();
 }
 
 export function claimAdmin(): Cell {
-    return beginMessage({ op: new BN(4) })
+    return beginMessage({ op: BigInt(4) })
         .endCell();
 }
-export function callTo(params: { toAddress: Address; amount: BN; masterMsg: Cell }): Cell {
-    return beginMessage({ op: new BN(6) })
+export function callTo(params: { toAddress: Address; amount: bigint; masterMsg: Cell }): Cell {
+    return beginMessage({ op: BigInt(6) })
         .storeAddress(params.toAddress)
         .storeCoins(params.amount)
         .storeRef(params.masterMsg)
@@ -58,7 +57,7 @@ export function callTo(params: { toAddress: Address; amount: BN; masterMsg: Cell
 }
 
 export function upgradeMinter(params: { newData: Cell; newCode: Cell }): Cell {
-    return beginMessage({ op: new BN(5) })
+    return beginMessage({ op: BigInt(5) })
         .storeRef(params.newData)
         .storeRef(params.newCode)
         .endCell();

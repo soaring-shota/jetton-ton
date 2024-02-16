@@ -1,8 +1,8 @@
 import * as jettonMinter from "../wrappers/jetton-minter";
 import fs from "fs";
-import { Address, TupleSlice, WalletContract, Cell, beginCell } from "ton";
 import dotenv from "dotenv";
 import { BN } from "bn.js";
+import { Address, Cell } from "@ton/core";
 dotenv.config();
 
 export function initData() {
@@ -10,8 +10,8 @@ export function initData() {
         throw new Error("ADMIN_ADDRESS is not defined");
 
     return jettonMinter.data({
-        totalSupply: new BN(0),
-        adminAddress: Address.parseFriendly(process.env.ADMIN_ADDRESS).address,
+        totalSupply: BigInt(0),
+        adminAddress: Address.parse(process.env.ADMIN_ADDRESS),
         jettonWalletCode: Cell.fromBoc(fs.readFileSync("build/jetton-wallet.cell"))[0],
     });
 }

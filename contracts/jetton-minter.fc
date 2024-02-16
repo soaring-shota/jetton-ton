@@ -238,6 +238,7 @@ cell build_content_cell() {
     content_dict~udict_set_ref(256, "decimals"H, begin_cell().store_uint(0, 8).store_slice("2").end_cell());
     content_dict~udict_set_ref(256, "name"H, begin_cell().store_uint(0, 8).store_slice("JPY World").end_cell());
     content_dict~udict_set_ref(256, "symbol"H, begin_cell().store_uint(0, 8).store_slice("JPYW").end_cell());
+    content_dict~udict_set_ref(256, "image"H, begin_cell().store_uint(0, 8).store_slice("https://passpay.io/assets/images/link-mark.webp").end_cell());
 
     cell content = begin_cell().store_uint(0, 8).store_dict(content_dict).end_cell();
     return content;

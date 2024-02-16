@@ -6,13 +6,12 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import fs from "fs";
-import path from "path";
-import glob from "fast-glob";
 import { mnemonicNew, mnemonicToWalletKey } from "ton-crypto";
-import { WalletContractV4, TonClient, toNano, fromNano, Cell} from "@ton/ton";
+import { WalletContractV4, TonClient, toNano, fromNano, Cell, Address, WalletContractV3R2 } from '@ton/ton';
 import JpywJettonMinter from "../wrappers/jetton-minter-contract";
+import { NetworkProvider } from "@ton/blueprint";
 
-async function run() {
+export async function run(provider: NetworkProvider) {
     console.log(`=================================================================`);
     console.log(`Deploy script running, let's find some contracts to deploy..`);
 
@@ -42,7 +41,7 @@ async function run() {
     }
 
     const walletKey = await mnemonicToWalletKey(deployerMnemonic.split(" "));
-    const wallet = WalletContractV4.create({ publicKey: walletKey.publicKey, workchain });
+    const wallet = WalletContractV3R2.create({ publicKey: walletKey.publicKey, workchain });
     const walletContract = client.open(wallet);
     const walletSender = walletContract.sender(walletKey.secretKey);
     console.log(` - Wallet address used to deploy from is: ${walletContract.address}`);
@@ -56,54 +55,49 @@ async function run() {
     } else {
         console.log(` - Wallet balance is ${fromNano(walletBalance)} TON, which will be used for gas`);
     }
-
-    // const rootContracts = glob.sync(["build/*.deploy.ts"]);
-    //     console.log(`\n* Found root contract '${rootContract} - let's deploy it':`);
-    //     const contractName = path.parse(path.parse(rootContract).name).name;
-
-        const cellArtifact = `build/jetton-minter.cell`;
-        if (!fs.existsSync(cellArtifact)) {
-            console.log(` - ERROR: '${cellArtifact}' not found, did you build?`);
-            process.exit(1);
+    const cellArtifact = `build/jetton-minter.cell`;
+    if (!fs.existsSync(cellArtifact)) {
+        console.log(` - ERROR: '${cellArtifact}' not found, did you build?`);
+        process.exit(1);
+    }
+    const initCodeCell = Cell.fromBoc(fs.readFileSync(cellArtifact))[0];
+    const initDataCell = Cell.fromBoc(fs.readFileSync("build/jetton-wallet.cell"))[0];
+    
+    const jpyw = JpywJettonMinter.createForDeploy(initCodeCell, 
+        {
+            totalSupply: BigInt("0"), 
+            adminAddress: walletContract.address,
+            jettonWalletCode: initDataCell,
         }
-        const initCodeCell = Cell.fromBoc(fs.readFileSync(cellArtifact))[0];
-        const initDataCell = Cell.fromBoc(fs.readFileSync("build/jetton-wallet.cell"))[0];
-        
-        const jpyw = JpywJettonMinter.createForDeploy(initCodeCell, 
-            {
-                totalSupply: BigInt("0"), 
-                adminAddress: walletContract.address,
-                jettonWalletCode: initDataCell,
-            }
-        )
-        
-        const newContractAddress = jpyw.address;
-        console.log(` - Based on your init code+data, your new contract address is: ${newContractAddress}`);
-        if (await client.isContractDeployed(newContractAddress)) {
-            console.log(` - Looks like the contract is already deployed in this address, skipping deployment`);
-            return;
-        }
-        await sleep(2000);
+    )
+    
+    const newContractAddress = jpyw.address;
+    console.log(` - Based on your init code+data, your new contract address is: ${newContractAddress}`);
+    if (await client.isContractDeployed(newContractAddress)) {
+        console.log(` - Looks like the contract is already deployed in this address, skipping deployment`);
+        // return;
+    }
+    await sleep(2000);
 
-        console.log(` - Let's deploy the contract on-chain..`);
-        const seqno = await walletContract.getSeqno();
-        await sleep(2000);
+    console.log(` - Let's deploy the contract on-chain..`);
+    const seqno = await walletContract.getSeqno();
+    await sleep(2000);
 
-        const jpywContract = client.open(jpyw);
-        await jpywContract.sendDeploy(walletSender);
+    const jpywContract = client.open(jpyw);
+    await jpywContract.sendDeploy(walletSender);
 
-        let currentSeqno = seqno;
-        while (currentSeqno == seqno) {
-            console.log("waiting for deploy transaction to confirm...");
-            await sleep(1500);
-            currentSeqno = await walletContract.getSeqno();
-        }
-        console.log("deploy transaction confirmed!");
+    let currentSeqno = seqno;
+    while (currentSeqno == seqno) {
+        console.log("waiting for deploy transaction to confirm...");
+        await sleep(1500);
+        currentSeqno = await walletContract.getSeqno();
+    }
+    console.log("deploy transaction confirmed!");
 
     console.log(``);
 }
 
-run();
+// main();
 
 function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
