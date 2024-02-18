@@ -4,7 +4,7 @@ import { TonClient,JettonMaster, WalletContractV3R2, Address, WalletContractV4, 
 import dotenv from "dotenv";
 dotenv.config();
 
-export async function run() {
+export async function transferJpyw(args: {amount: bigint, toAddress: string}) {
     let chain: string, endpointUrl: string;
 
     if (process.env.TESTNET || process.env.npm_lifecycle_event == "deploy:testnet") {
@@ -40,10 +40,10 @@ export async function run() {
     console.log('wallet balance is', walletBalance);
     // await sleep(3 * 1000);
     
-    const jpywAddress = Address.parseFriendly("EQBJ4La4gi6qAQqLl3-EC7M7D7bXUdFwVmMlUJNlgV5dES0H").address;
+    const jpywAddress = Address.parseFriendly(process.env.JPYW_MINTER_ADDRESS??"").address;
 
     const jettonMaster = client.open(JettonMaster.create(jpywAddress))
-    const toJettonWalletAddress = await jettonMaster.getWalletAddress(Address.parse("EQCM4c41g1YiC-Qlh7yYdY8wLqS4sM5eWncLmH_aTgCthNCR"));
+    const toJettonWalletAddress = await jettonMaster.getWalletAddress(Address.parse(args.toAddress));
     console.log('jpywjettonaddr', toJettonWalletAddress);
     
     const forwardPayload = beginCell()
@@ -54,9 +54,9 @@ export async function run() {
     const messageBody = beginCell()
         .storeUint(0x0f8a7ea5, 32) // opcode for jetton transfer
         .storeUint(0, 64) // query id
-        .storeCoins(BigInt('1000000')) // jetton amount, amount * 10^9
-        .storeAddress(Address.parse("EQCM4c41g1YiC-Qlh7yYdY8wLqS4sM5eWncLmH_aTgCthNCR"))
-        .storeAddress(Address.parse("EQCM4c41g1YiC-Qlh7yYdY8wLqS4sM5eWncLmH_aTgCthNCR")) // response destination
+        .storeCoins(args.amount) // jetton amount, amount * 10^9
+        .storeAddress(Address.parse(args.toAddress))
+        .storeAddress(Address.parse(args.toAddress)) // response destination
         .storeBit(0) // no custom payload
         .storeCoins(toNano('0.02')) // forward amount
         .storeBit(1) // we store forwardPayload as a reference
@@ -67,7 +67,7 @@ export async function run() {
     const jpywAdminJettonWalletAddress = Address.parse(jpywAdminJettonWalletAddressString);
     
     client.provider(jpywAdminJettonWalletAddress, null).internal(walletSender, 
-        { value: "0.2", // send 0.002 TON for gas
+        { value: "0.1", // send 0.002 TON for gas
         body: messageBody}
     );
 
@@ -83,7 +83,3 @@ export async function run() {
 function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
-run().then(()=>{
-    console.log("success");
-});

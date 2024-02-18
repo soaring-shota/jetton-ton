@@ -25,7 +25,7 @@ export default class JpywJettonMinter implements Contract {
       });
     }
     
-    async sendMint(provider: ContractProvider, via: Sender, params: { toAddress: Address; jettonAmount: bigint; fromAddress?: Address; responseAddress?: Address; forwardTonAmount?: bigint; }) {
+    async mint(provider: ContractProvider, via: Sender, params: { toAddress: Address; jettonAmount: bigint; fromAddress?: Address; responseAddress?: Address; forwardTonAmount?: bigint; }) {
       const messageBody = beginCell()
         .storeUint(21, 32)
         .storeUint(Math.floor(Math.random() * Math.pow(2, 31)), 64)

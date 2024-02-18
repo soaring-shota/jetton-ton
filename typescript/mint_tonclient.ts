@@ -3,10 +3,9 @@ import { TonClient,JettonMaster, WalletContractV3R2, Address, WalletContractV4, 
 import JpywJettonMinter from "../wrappers/jetton-minter-contract";
 
 import dotenv from "dotenv";
-import { NetworkProvider } from '@ton/blueprint';
 dotenv.config();
 
-export async function run(provider: NetworkProvider) {
+export async function mintJpyw(args: {mintAmount: bigint, toAddress: string}) {
     let chain: string, endpointUrl: string;
 
     if (process.env.TESTNET || process.env.npm_lifecycle_event == "deploy:testnet") {
@@ -32,27 +31,26 @@ export async function run(provider: NetworkProvider) {
     }
     
     const walletKey = await mnemonicToWalletKey(deployerMnemonic.split(" "));
-    const wallet = WalletContractV4.create({ publicKey: walletKey.publicKey, workchain });
+    const wallet = WalletContractV3R2.create({ publicKey: walletKey.publicKey, workchain });
     const walletContract = client.open(wallet);
     const walletSender = walletContract.sender(walletKey.secretKey);
     const seqno = await walletContract.getSeqno();
-    console.log(` - Wallet address used to deploy from is: ${walletContract.address}`);
+
+    // console.log(` - Wallet address used to deploy from is: ${walletContract.address}`);
+
     const walletBalance = await client.getBalance(walletContract.address);
     console.log('wallet balance is', walletBalance);
     await sleep(3 * 1000);
     
-    const jpywAddress = Address.parseFriendly("EQBIql1mucKdpPyBag5YeP7-D0Be4FGP0lKE4YUPr5wHpifE").address;
+    const jpywAddress = Address.parseFriendly(process.env.JPYW_MINTER_ADDRESS??"").address;
     const jpyw = new JpywJettonMinter(jpywAddress);
     const jpywContract = client.open(jpyw);
 
-    const jettonMaster = client.open(JettonMaster.create(jpywAddress))
-    const toJettonWalletAddress = await jettonMaster.getWalletAddress(walletContract.address);
-    console.log('jpywjettonaddr', toJettonWalletAddress);
-    await jpywContract.sendMint(walletSender, 
+    const provider = client.provider(jpywAddress, null);
+    await jpywContract.mint(provider, walletSender, 
         {
-            toAddress: Address.parse("EQCM4c41g1YiC-Qlh7yYdY8wLqS4sM5eWncLmH_aTgCthNCR"),
-            // toAddress: toJettonWalletAddress,
-            jettonAmount: BigInt("5000000000"),
+            toAddress: Address.parse(args.toAddress),
+            jettonAmount: args.mintAmount,
             forwardTonAmount: toNano("0.05"),
         }
     )
@@ -64,10 +62,14 @@ export async function run(provider: NetworkProvider) {
         currentSeqno = await walletContract.getSeqno();
     }
     console.log("transaction confirmed!");
+
+    const jettonMaster = client.open(JettonMaster.create(jpywAddress))
+    const toJettonWalletAddress = await jettonMaster.getWalletAddress(Address.parse(args.toAddress));
+    console.log("JPYW Jetton Wallet Address: ", toJettonWalletAddress);
+
+    return toJettonWalletAddress;
 }
 
 function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
-// run();

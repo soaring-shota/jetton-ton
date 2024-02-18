@@ -3,7 +3,9 @@
     "version": "0.0.1",
     "scripts": {
         "build": "ts-node ./build/_build.ts",
-        "deploy": "ts-node ./build/_deploy.ts"
+        "deploy": "ts-node ./build/_deploy.ts",
+        "mint": "ts-node ./command-cli/mint-jpyw.cli.ts",
+        "transfer": "ts-node ./command-cli/transfer-jpyw.cli.ts"
     },
     "devDependencies": {
         "@ton/blueprint": "^0.15.0",
@@ -27,6 +29,7 @@
         "typescript": "^5.3.3"
     },
     "dependencies": {
+        "commander": "^12.0.0",
         "tonweb": "^0.0.60"
     }
 }
