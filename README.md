@@ -14,3 +14,7 @@
 ### Mint JPYW
 
 `npm run mint -- --toAddress='<destination address>' --amount='<mint amount>'`
+
+### Transfer JPYW
+
+`npm run transfer -- --toAddress='<destination address>' --amount='<mint amount>'`
