@@ -45,28 +45,6 @@ export default class JpywJettonMinter implements Contract {
         value: "0.2", // send 0.002 TON for gas
         body: messageBody
     });
-    }
-
-    async mint(provider: ContractProvider, via: Sender, params: { toAddress: Address; jettonAmount: bigint; fromAddress?: Address; responseAddress?: Address; forwardTonAmount?: bigint; }) {  
-      const messageBody = beginCell()
-        .storeUint(21, 32)
-        .storeUint(Math.floor(Math.random() * Math.pow(2, 31)), 64)
-        .storeAddress(params.toAddress)
-        .storeCoins(toNano(0.2))
-        .storeRef(beginCell()
-            .storeUint(0x178d4519, 32)
-            .storeUint(0, 64)
-            .storeCoins(params.jettonAmount)
-            .storeAddress(params.fromAddress || null)
-            .storeAddress(params.responseAddress || null)
-            .storeCoins(params.forwardTonAmount || 0)
-            .storeUint(0, 1)
-            .endCell())
-      .endCell();
-      await provider.internal(via, {
-        value: "0.2", // send 0.002 TON for gas
-        body: messageBody
-    });
   }
     
   async changeAdmin(provider: ContractProvider, via: Sender, params: { newAdmin: Address }) {

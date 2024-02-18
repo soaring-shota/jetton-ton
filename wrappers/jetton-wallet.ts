@@ -1,10 +1,10 @@
 import BN from "bn.js";
-import { Cell, beginCell, Address } from "ton";
 import { beginMessage } from "./helpers";
+import { Address, Cell, beginCell } from "@ton/ton";
 
 export function data(params: {
-    status: BN;
-    balance: BN;
+    status: bigint;
+    balance: bigint;
     ownerAddress: Address;
     jettonMasterAddress: Address;
     jettonWalletCode: Cell;
@@ -26,49 +26,49 @@ export function data(params: {
 // }
 
 export function addToBlockList() : Cell {
-    return beginMessage({op: new BN(100)})
+    return beginMessage({op: BigInt(100)})
         .endCell();
 }
 
 export function removeFromBlockList() : Cell {
-    return beginMessage({op: new BN(101)})
+    return beginMessage({op: BigInt(101)})
         .endCell();
 }
 
-export function burn(params: { jettonAmount: BN; responseAddress?: Address }): Cell {
-    return beginMessage({ op: new BN(0x595f07bc) })
+export function burn(params: { jettonAmount: bigint; responseAddress?: Address }): Cell {
+    return beginMessage({ op: BigInt(0x595f07bc) })
         .storeCoins(params.jettonAmount)
         .storeAddress(params.responseAddress || null)
         .endCell();
 }
 
 export function transfer(params: {
-    jettonAmount: BN;
+    jettonAmount: bigint;
     toAddress: Address;
-    forwardTonAmount?: BN;
+    forwardTonAmount?: bigint;
     responseAddress?: Address
 }): Cell {
-    return beginMessage({ op: new BN(0xf8a7ea5) })
+    return beginMessage({ op: BigInt(0xf8a7ea5) })
         .storeCoins(params.jettonAmount)
         .storeAddress(params.toAddress)
         .storeAddress(params.responseAddress || null)
         .storeBit(false)
-        .storeCoins(params.forwardTonAmount || new BN(0))
+        .storeCoins(params.forwardTonAmount || BigInt(0))
         .storeBit(false)
         .endCell();
 }
 
 export function internalTransfer(params: {
-    jettonAmount: BN;
+    jettonAmount: bigint;
     fromAddress: Address;
-    forwardTonAmount?: BN;
+    forwardTonAmount?: bigint;
     responseAddress?: Address
 }): Cell {
-    return beginMessage({ op: new BN(0x178d4519) })
+    return beginMessage({ op: BigInt(0x178d4519) })
         .storeCoins(params.jettonAmount)
         .storeAddress(params.fromAddress)
         .storeAddress(params.responseAddress || null)
-        .storeCoins(params.forwardTonAmount || new BN(0))
+        .storeCoins(params.forwardTonAmount || BigInt(0))
         .storeBit(false)
         .endCell();
 }

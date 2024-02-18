@@ -3,6 +3,7 @@ import JpywJettonMinter from "../wrappers/jetton-minter-contract";
 import { Address, WalletContractV4, toNano } from "@ton/ton";
 import { mnemonicToWalletKey } from "ton-crypto";
 import { transfer } from '../wrappers/jetton-wallet';
+import BN from 'bn.js';
 
 const {JettonMinter, JettonWallet} = TonWeb.token.jetton;
 
@@ -18,8 +19,8 @@ async function main() {
     
     if (process.env.TESTNET || process.env.npm_lifecycle_event == "deploy:testnet") {
         console.log(`\n* We are working with 'testnet' (https://t.me/testgiver_ton_bot will give you testnet TON)`);
-        // endpointUrl = "https://testnet.toncenter.com/api/v2/jsonRPC";
-        endpointUrl = "https://testnet.tonapi.io/v2/jsonRPC";
+        endpointUrl = "https://testnet.toncenter.com/api/v2/jsonRPC";
+        // endpointUrl = "https://testnet.tonapi.io/v2/jsonRPC";
     } else {
         console.log(`\n* We are working with 'mainnet'`);
         endpointUrl = "https://toncenter.com/api/v2/jsonRPC";
@@ -55,9 +56,9 @@ async function main() {
     }
 
     const jpywJettonWallet = new TonWeb.token.ft.JettonWallet(tonweb.provider, {
-        address: jpywInfo.address
+        address: "EQBr8pWA01NPdt9K24mJcEDnvQERGvG1kgJeZQ13AoKTv1uF"
     });
-
+    const jpywJettonWalletAddress = await jpywJettonWallet.getAddress();
     const seqno = (await wallet.methods.seqno().call()) || 0;
     console.log({seqno})
 
@@ -67,60 +68,29 @@ async function main() {
         jettonContentUri: '',
         jettonWalletCodeHex: TonWeb.token.ft.JettonWallet.codeHex
     });
-    const minterAddress = await minter.getAddress();
-    console.log('minter address ', minterAddress.toString(true, true, true));
-    // console.log('uri: ', (await minter.getJettonData()));
-    console.log('yyyyyyy', walletAddress);
-    console.log('xxxxxxxx', minter.createMintBody({
-        tokenAmount: TonWeb.utils.toNano('100'),
-        destination: walletAddress,
-        amount: TonWeb.utils.toNano('0.04')
-    }));
+    
+    // console.log('xxxxxxxxxxx', await minter.getAddress());
+    const comment = new Uint8Array([... new Uint8Array(7), ... new TextEncoder().encode('PassPay')]);
+    const toJettonWalletAddress = await minter.getJettonWalletAddress(new TonWeb.utils.Address("EQCM4c41g1YiC-Qlh7yYdY8wLqS4sM5eWncLmH_aTgCthNCR"));
+    console.log('toJettonWalletAddress', toJettonWalletAddress.toString(true, true, true));
+    
     console.log(
         await wallet.methods.transfer({
             secretKey: walletKey.secretKey,
-            toAddress: minterAddress.toString(true, true, true),
-            amount: TonWeb.utils.toNano('0.5'),
+            toAddress: jpywJettonWalletAddress.toString(true, true, true),
+            amount: TonWeb.utils.toNano('0.05'),
             seqno: seqno,
-            payload: minter.createMintBody({
-                tokenAmount: TonWeb.utils.toNano('100'),
-                destination: walletAddress,
-                amount: TonWeb.utils.toNano('0.04')
+            payload: await jpywJettonWallet.createTransferBody({
+                tokenAmount: TonWeb.utils.toNano("500"),
+                jettonAmount: new BN("5000000"),
+                toAddress: toJettonWalletAddress,
+                responseAddress: walletAddress,
+                forwardAmount: TonWeb.utils.toNano('0.01'),
+                forwardPayload: comment,
             }),
             sendMode: 3,
         }).send()
     );
-
-    // const walletAddress = "EQCM4c41g1YiC-Qlh7yYdY8wLqS4sM5eWncLmH_aTgCthNCR";
-    // // const walletKey = await mnemonicToWalletKey(deployerMnemonic.split(" "));
-    // // const wallet = WalletContractV4.create({ publicKey: walletKey.publicKey, workchain });
-    // // const walletContract = client.open(wallet);
-    // // const walletSender = walletContract.sender(walletKey.secretKey);
-
-    // const jettonMinter = new TonWeb.token.jetton.JettonMinter(tonweb.provider, {address: jpywInfo.address});
-    // const address = await jettonMinter.getJettonWalletAddress(new TonWeb.utils.Address(walletAddress));
-    // const addressTo = await jettonMinter.getJettonWalletAddress(new TonWeb.utils.Address("EQDpZxhM3Zvwi7YlS7UPkeQg3tSF8wDj592QxSDahgvSEpXq"));
-    // // It is important to always check that wallet indeed is attributed to desired Jetton Master:
-    // const jettonWallet = new TonWeb.token.jetton.JettonWallet(tonweb.provider, {
-    //     address: address
-    // });
-
-    // const jettonData = await jettonWallet.getData();
-    // if (jettonData.jettonMinterAddress.toString(false) !== new TonWeb.utils.Address(info.address).toString(false)) {
-    // throw new Error('jetton minter address from jetton wallet doesnt match config');
-    // }
-
-    // const seqno = (await wallet.methods.seqno().call()) || 0;
-
-    // wallet.methods.transfer({
-    //     secretKey: walletKey,
-    //     toAddress: addressTo,
-    //     amount: TonWeb.utils.toNano("0.05"),
-    //     seqno: seqno,
-
-    // })
-    // console.log('Jetton wallet address:', address.toString(true, true, true));
-
 }
 
 main().then(()=>{
