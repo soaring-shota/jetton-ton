@@ -1,5 +1,5 @@
 import { program } from 'commander';
-import { transferJpyw } from '../typescript/transfer_jetton_tonclient';
+import { transferStandardTon } from '../typescript/transfer_standard_ton';
 
 program
   .option('--toAddress <string>', 'Destination address for minted jettons')
@@ -19,7 +19,7 @@ const exec = async () => {
         console.error("required argument '--amount <string>' not specified");
         process.exit(1);
     }
-    const toJettonAddress = await transferJpyw({amount: BigInt(amount), toAddress: toAddress});
+    const toJettonAddress = await transferStandardTon({amount: amount, toAddress: toAddress});
 }
 
 exec();

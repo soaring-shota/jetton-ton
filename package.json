@@ -5,7 +5,8 @@
         "build": "ts-node ./build/_build.ts",
         "deploy": "ts-node ./build/_deploy.ts",
         "mint": "ts-node ./command-cli/mint-jpyw.cli.ts",
-        "transfer": "ts-node ./command-cli/transfer-jpyw.cli.ts"
+        "transfer": "ts-node ./command-cli/transfer-jpyw.cli.ts",
+        "transfer-ton": "ts-node ./command-cli/transfer-ton.cli.ts"
     },
     "devDependencies": {
         "@ton/blueprint": "^0.15.0",

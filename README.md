@@ -17,4 +17,8 @@
 
 ### Transfer JPYW
 
-`npm run transfer -- --toAddress='<destination address>' --amount='<mint amount>'`
+`npm run transfer -- --toAddress='<destination address>' --amount='<transfer amount>'`
+
+### Transfer Standard Ton
+
+`npm run transfer -- --toAddress='<destination address>' --amount='<transfer amount e.g: 0.5>'`
