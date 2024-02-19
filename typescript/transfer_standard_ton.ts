@@ -45,7 +45,9 @@ export async function transferStandardTon(args: {amount: string, toAddress: stri
         secretKey: walletKey.secretKey,
         messages: [ internal({
             value: toNano(args.amount),
-            to: args.toAddress
+            to: args.toAddress,
+            bounce: false,
+            body: 'used Passpay Transfer script'
         })]
     })
 
