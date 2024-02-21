@@ -11,23 +11,27 @@ import glob from "fast-glob";
 import { mnemonicNew, mnemonicToWalletKey } from "ton-crypto";
 import { WalletContractV4, TonClient, toNano, fromNano, Cell} from "@ton/ton";
 import JpywJettonMinter from "../wrappers/jetton-minter-contract";
+import { stringify } from "querystring";
 
 async function run() {
     console.log(`=================================================================`);
     console.log(`Deploy script running, let's find some contracts to deploy..`);
 
     let chain: string,
-        endpointUrl: string;
+        endpointUrl: string,
+        apiKey: string;
     if (process.env.TESTNET || process.env.npm_lifecycle_event == "deploy:testnet") {
         console.log(`\n* We are working with 'testnet' (https://t.me/testgiver_ton_bot will give you testnet TON)`);
         endpointUrl = "https://testnet.toncenter.com/api/v2/jsonRPC";
+        apiKey = process.env.API_KEY_TESTNET ?? "";
     } else {
         console.log(`\n* We are working with 'mainnet'`);
         endpointUrl = "https://toncenter.com/api/v2/jsonRPC";
+        apiKey = process.env.API_KEY_MAINNET ?? "";
     }
 
     // initialize globals
-    const client = new TonClient({ endpoint: endpointUrl, apiKey: process.env.API_KEY });
+    const client = new TonClient({ endpoint: endpointUrl, apiKey: apiKey });
     const newContractFunding = toNano(0.1); // this will be (almost in full) the balance of a new deployed contract and allow it to pay rent
     const workchain = 0;
 

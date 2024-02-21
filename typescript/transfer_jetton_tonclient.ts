@@ -5,18 +5,21 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export async function transferJpyw(args: {amount: bigint, toAddress: string}) {
-    let chain: string, endpointUrl: string;
-
+    let chain: string,
+        endpointUrl: string,
+        apiKey: string;
     if (process.env.TESTNET || process.env.npm_lifecycle_event == "deploy:testnet") {
         console.log(`\n* We are working with 'testnet' (https://t.me/testgiver_ton_bot will give you testnet TON)`);
         endpointUrl = "https://testnet.toncenter.com/api/v2/jsonRPC";
+        apiKey = process.env.API_KEY_TESTNET ?? "";
     } else {
         console.log(`\n* We are working with 'mainnet'`);
         endpointUrl = "https://toncenter.com/api/v2/jsonRPC";
+        apiKey = process.env.API_KEY_MAINNET ?? "";
     }
 
     // initialize globals
-    const client = new TonClient({ endpoint: endpointUrl, apiKey: process.env.API_KEY });
+    const client = new TonClient({ endpoint: endpointUrl, apiKey: apiKey });
     const workchain = 0;
 
     const deployConfigEnv = ".env";

@@ -19,8 +19,7 @@ const exec = async () => {
         console.error("required argument '--amount <string>' not specified");
         process.exit(1);
     }
-    console.log("xxxxxx", toAddress);
-    console.log("yyyyyy", amount);
+ 
     const toJettonAddress = await mintJpyw({mintAmount: BigInt(amount), toAddress: toAddress});
 }
 

@@ -6,18 +6,21 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export async function mintJpyw(args: {mintAmount: bigint, toAddress: string}) {
-    let chain: string, endpointUrl: string;
-
+    let chain: string,
+        endpointUrl: string,
+        apiKey: string;
     if (process.env.TESTNET || process.env.npm_lifecycle_event == "deploy:testnet") {
         console.log(`\n* We are working with 'testnet' (https://t.me/testgiver_ton_bot will give you testnet TON)`);
         endpointUrl = "https://testnet.toncenter.com/api/v2/jsonRPC";
+        apiKey = process.env.API_KEY_TESTNET ?? "";
     } else {
         console.log(`\n* We are working with 'mainnet'`);
         endpointUrl = "https://toncenter.com/api/v2/jsonRPC";
+        apiKey = process.env.API_KEY_MAINNET ?? "";
     }
 
     // initialize globals
-    const client = new TonClient({ endpoint: endpointUrl, apiKey: process.env.API_KEY });
+    const client = new TonClient({ endpoint: endpointUrl, apiKey: apiKey });
     const workchain = 0;
 
     const deployConfigEnv = ".env";
@@ -31,12 +34,12 @@ export async function mintJpyw(args: {mintAmount: bigint, toAddress: string}) {
     }
     
     const walletKey = await mnemonicToWalletKey(deployerMnemonic.split(" "));
-    const wallet = WalletContractV3R2.create({ publicKey: walletKey.publicKey, workchain });
+    const wallet = WalletContractV4.create({ publicKey: walletKey.publicKey, workchain });
     const walletContract = client.open(wallet);
     const walletSender = walletContract.sender(walletKey.secretKey);
     const seqno = await walletContract.getSeqno();
 
-    // console.log(` - Wallet address used to deploy from is: ${walletContract.address}`);
+    console.log(` - Wallet address used to deploy from is: ${walletContract.address}`);
 
     const walletBalance = await client.getBalance(walletContract.address);
     console.log('wallet balance is', walletBalance);

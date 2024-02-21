@@ -2,17 +2,17 @@
 
 #pragma version >=0.2.0;
 
-;; #include "stdlib.fc";
-;; #include "op-codes.fc";
-;; #include "params.fc";
-;; #include "send-modes.fc";
-;; #include "jetton-utils.fc";
+#include "stdlib.fc";
+#include "op-codes.fc";
+#include "params.fc";
+#include "send-modes.fc";
+#include "jetton-utils.fc";
 
-#include "contracts/stdlib.fc";
-#include "contracts/op-codes.fc";
-#include "contracts/params.fc";
-#include "contracts/send-modes.fc";
-#include "contracts/jetton-utils.fc";
+;;#include "contracts/stdlib.fc";
+;; #include "contracts/op-codes.fc";
+;; #include "contracts/params.fc";
+;; #include "contracts/send-modes.fc";
+;; #include "contracts/jetton-utils.fc";
 
 ;; storage scheme
 ;; storage#_ total_supply:Coins admin_address:MsgAddress transfer_admin_address:MsgAddress jetton_wallet_code:^Cell = Storage;

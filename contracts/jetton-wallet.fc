@@ -14,17 +14,17 @@ This is suitable for most tokens, if you need tokens transferable between workch
 
 #pragma version >=0.2.0;
 
-;; #include "stdlib.fc";
-;; #include "op-codes.fc";
-;; #include "send-modes.fc";
-;; #include "params.fc";
-;; #include "jetton-utils.fc";
+#include "stdlib.fc";
+#include "op-codes.fc";
+#include "send-modes.fc";
+#include "params.fc";
+#include "jetton-utils.fc";
 
-#include "contracts/stdlib.fc";
-#include "contracts/op-codes.fc";
-#include "contracts/send-modes.fc";
-#include "contracts/params.fc";
-#include "contracts/jetton-utils.fc";
+;;#include "contracts/stdlib.fc";
+;;#include "contracts/op-codes.fc";
+;;#include "contracts/send-modes.fc";
+;;#include "contracts/params.fc";
+;;#include "contracts/jetton-utils.fc";
 
 const min_tons_for_storage = 10000000; ;; 0.01 TON
 const gas_consumption = 10000000; ;; 0.01 TON
