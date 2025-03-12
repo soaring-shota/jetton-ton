@@ -1,4 +1,4 @@
-# jpyw
+# Jetton Contract
 
 
 ## How to use
@@ -7,15 +7,15 @@
 
 `npm run build`
 
-### Deploy JPYW jetton
+### Deploy Jetton Contract
 
 `npm run deploy`
 
-### Mint JPYW
+### Mint Jetton
 
 `npm run mint -- --toAddress='<destination address>' --amount='<mint amount>'`
 
-### Transfer JPYW
+### Transfer Jetton
 
 `npm run transfer -- --toAddress='<destination address>' --amount='<transfer amount>'`
 
